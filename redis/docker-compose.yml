@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7.2
+    container_name: jambo-gear-redis-local
+    restart: unless-stopped
+
+    ports:
+      - "6379:6379"
+
+    command: >
+      redis-server
+      --requirepass mAnTfV9z
+      --appendonly yes
+      --save 60 1
+      --loglevel notice
+
+    volumes:
+      - redis-data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "mAnTfV9z", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis-data:

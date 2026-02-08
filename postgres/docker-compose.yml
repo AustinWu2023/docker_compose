@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  mes-dev-postgres:
+    image: postgres:16-alpine
+    container_name: mes-dev-postgres
+    restart: unless-stopped
+
+    environment:
+      # MES Dev/Test 專用命名
+      POSTGRES_DB: mes_dev_db
+      POSTGRES_USER: mes_dev_user
+      POSTGRES_PASSWORD: mes_dev_password
+
+      # 可選：統一 timezone（你在台灣）
+      TZ: Asia/Taipei
+
+    ports:
+      # 若你本機已經有 Postgres，建議改成 "15432:5432"
+      - "5432:5432"
+
+    volumes:
+      # 資料持久化（清楚標示 MES Dev）
+      - mes_dev_postgres_data:/var/lib/postgresql/data
+
+      # 可選：放 init scripts（.sql / .sh）
+      # 你可以在 ./postgres/initdb 放建表或種子資料
+      - ./postgres/initdb:/docker-entrypoint-initdb.d:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mes_dev_user -d mes_dev_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  mes_dev_postgres_data:
+    name: mes_dev_postgres_data
